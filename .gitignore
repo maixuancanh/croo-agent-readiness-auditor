@@ -8,10 +8,4 @@ out/
 npm-debug.log*
 Thumbs.db
 .DS_Store
-media/demo_frames/
-media/*.wav
-media/*.py
-media/*.sh
-media/*.txt
-media/*.png
-media/*.mp4
+media/
