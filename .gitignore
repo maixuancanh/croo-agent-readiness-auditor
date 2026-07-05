@@ -14,4 +14,4 @@ media/*.py
 media/*.sh
 media/*.txt
 media/*.png
-!media/croo-readiness-auditor-demo.mp4
+media/*.mp4
