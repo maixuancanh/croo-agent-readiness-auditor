@@ -8,3 +8,10 @@ out/
 npm-debug.log*
 Thumbs.db
 .DS_Store
+media/demo_frames/
+media/*.wav
+media/*.py
+media/*.sh
+media/*.txt
+media/*.png
+!media/croo-readiness-auditor-demo.mp4

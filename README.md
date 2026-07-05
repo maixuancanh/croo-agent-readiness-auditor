@@ -40,6 +40,12 @@ Services:
 
 The live provider worker is deployed as a long-running Railway service so the agent can respond without a local terminal.
 
+## Demo Video
+
+The demo is under five minutes and walks through the live CROO listing, CAP services, accepted on-chain orders, local setup, and Railway provider deployment.
+
+[Watch the demo video](media/croo-readiness-auditor-demo.mp4)
+
 ## Live CAP Evidence
 
 The project has been tested with real CROO orders and accepted deliveries.
