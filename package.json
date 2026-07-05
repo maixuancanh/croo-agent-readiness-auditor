@@ -1,0 +1,41 @@
+{
+  "name": "croo-agent-readiness-auditor",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "A live CROO Agent Store readiness auditor with CAP order delivery and synthetic settlement checks.",
+  "bin": {
+    "cap-harness": "./dist/cli/run.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "api": "tsx src/server.ts",
+    "start:provider": "node dist/src/cli/provider.js --config examples/cap-harness.config.json",
+    "demo:provider": "tsx src/demo/provider.ts",
+    "demo:run": "tsx src/cli/run.ts run --config examples/cap-harness.config.json --mode simulation --report out/readiness.json --markdown out/readiness.md",
+    "demo:agent-readiness-audit": "tsx src/cli/run.ts agent-readiness-audit --input examples/agent-readiness-audit.request.json --out out/agent-readiness-audit.json",
+    "demo:service-registration": "tsx src/cli/run.ts export-service --config examples/cap-harness.config.json --out out/croo-service-registration.json",
+    "demo:auditor-service-registration": "tsx src/cli/run.ts export-auditor-service --out out/croo-agent-readiness-auditor-registration.json",
+    "croo:negotiate-smoke": "tsx src/cli/run.ts croo-negotiate-smoke --config examples/cap-harness.config.json",
+    "croo:live-e2e": "tsx src/cli/run.ts croo-live-e2e --config examples/cap-harness.config.json",
+    "croo:provider": "tsx src/cli/provider.ts --config examples/cap-harness.config.json"
+  },
+  "dependencies": {
+    "@croo-network/sdk": "^0.2.1",
+    "ajv": "^8.17.1",
+    "commander": "^12.1.0",
+    "fastify": "^5.9.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.14",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "vitest": "^2.1.9"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

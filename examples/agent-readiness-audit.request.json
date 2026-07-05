@@ -1,0 +1,7 @@
+{
+  "agentId": "11339c57-f401-4955-95a3-26fd0937fdce",
+  "serviceId": "b47a05f8-c885-4967-b2cd-71135f202e49",
+  "mode": "listing_audit",
+  "useLiveStore": true,
+  "maxProbeSpendUsdc": 0
+}

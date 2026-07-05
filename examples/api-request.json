@@ -1,0 +1,32 @@
+{
+  "providerUrl": "demo://provider",
+  "serviceName": "cap_synthetic_order_harness",
+  "mode": "simulation",
+  "slaSeconds": 60,
+  "proofRequired": true,
+  "timeoutMs": 250,
+  "requestPayload": {
+    "agentEndpoint": "http://localhost:8788/service",
+    "capability": "risk_report",
+    "requestId": "api-demo-001"
+  },
+  "inputSchema": {
+    "type": "object",
+    "required": ["agentEndpoint", "capability", "requestId"],
+    "properties": {
+      "agentEndpoint": { "type": "string" },
+      "capability": { "type": "string" },
+      "requestId": { "type": "string" }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "required": ["status", "serviceName", "checkedAt", "findings"],
+    "properties": {
+      "status": { "enum": ["PASS", "WARN", "FAIL"] },
+      "serviceName": { "type": "string" },
+      "checkedAt": { "type": "string" },
+      "findings": { "type": "array" }
+    }
+  }
+}
