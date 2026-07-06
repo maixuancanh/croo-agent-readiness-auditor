@@ -3,6 +3,7 @@ import { CrooLiveAdapter } from "../adapters/croo-live-adapter.js";
 import { harnessConfigSchema, type HarnessConfig, type ReadinessReport } from "../models/harness.js";
 import { runAgentReadinessAudit } from "./agent-readiness-audit.js";
 import { runHarness } from "./harness-service.js";
+import { sha256Hex } from "./hash.js";
 
 export interface ProviderRuntimeOptions {
   configPath?: string;
@@ -49,24 +50,38 @@ export function buildProviderDeliverable(report: ReadinessReport, order: Order):
 
 export async function buildAuditDeliverableFromNegotiation(negotiation: Negotiation): Promise<Record<string, unknown>> {
   const requirements = parseRequirements(negotiation.requirements);
-  const report = await runAgentReadinessAudit(requirements);
-  return {
-    grade: report.scores.grade,
-    recommendation: report.recommendation,
-    overall_score: report.scores.overall,
-    fee_estimate:
-      report.feeEstimate.estimatedTrueCostUsdc == null
-        ? `paymaster_fee_estimate=${report.feeEstimate.observedPaymasterFeeUsdc} USDC`
-        : `service_price=${report.feeEstimate.servicePriceUsdc} USDC; estimated_true_cost=${report.feeEstimate.estimatedTrueCostUsdc} USDC`,
-    finding_summary:
-      report.findings.length === 0
-        ? "No blocking findings."
-        : report.findings.map((finding) => `${finding.severity}:${finding.category}:${finding.message}`).join(" | "),
-    // Dashboard field was registered as array in the CROO schema builder.
-    receipt_hash: [report.receiptHash],
-    target_agent: report.target.agentName ?? report.target.agentId ?? "unknown",
-    target_service: report.target.serviceName ?? report.target.serviceId ?? "unknown"
-  };
+  try {
+    const report = await runAgentReadinessAudit(requirements);
+    return {
+      grade: report.scores.grade,
+      recommendation: report.recommendation,
+      overall_score: report.scores.overall,
+      fee_estimate:
+        report.feeEstimate.estimatedTrueCostUsdc == null
+          ? `paymaster_fee_estimate=${report.feeEstimate.observedPaymasterFeeUsdc} USDC`
+          : `service_price=${report.feeEstimate.servicePriceUsdc} USDC; estimated_true_cost=${report.feeEstimate.estimatedTrueCostUsdc} USDC`,
+      finding_summary:
+        report.findings.length === 0
+          ? "No blocking findings."
+          : report.findings.map((finding) => `${finding.severity}:${finding.category}:${finding.message}`).join(" | "),
+      // Dashboard field was registered as array in the CROO schema builder.
+      receipt_hash: [report.receiptHash],
+      target_agent: report.target.agentName ?? report.target.agentId ?? "unknown",
+      target_service: report.target.serviceName ?? report.target.serviceId ?? "unknown"
+    };
+  } catch (error) {
+    const findingSummary = formatAuditInputError(error);
+    return {
+      grade: "F",
+      recommendation: "FIX_INPUT",
+      overall_score: 0,
+      fee_estimate: "Not evaluated because the audit request did not match the registered schema.",
+      finding_summary: findingSummary,
+      receipt_hash: [sha256Hex({ negotiationId: negotiation.negotiationId, requirements, findingSummary })],
+      target_agent: "invalid request",
+      target_service: "invalid request"
+    };
+  }
 }
 
 export async function deliverPaidOrderOnce(orderId: string, providerSdkKey: string, targetServiceId: string, fallback: HarnessConfig) {
@@ -186,4 +201,16 @@ function requireEventId(value: string | undefined, name: string): string {
     throw new Error(`CROO event is missing ${name}.`);
   }
   return value;
+}
+
+function formatAuditInputError(error: unknown): string {
+  if (error && typeof error === "object" && "issues" in error && Array.isArray((error as { issues?: unknown[] }).issues)) {
+    return (error as { issues: Array<{ path?: unknown[]; message?: string }> }).issues
+      .map((issue) => {
+        const path = issue.path?.length ? `/${issue.path.join("/")}` : "/";
+        return `${path}: ${issue.message ?? "invalid value"}`;
+      })
+      .join(" | ");
+  }
+  return error instanceof Error ? error.message : "Invalid audit request.";
 }

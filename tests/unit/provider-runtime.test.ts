@@ -151,4 +151,34 @@ describe("provider runtime helpers", () => {
       receipt_hash: [expect.stringMatching(/^sha256:/)]
     });
   });
+
+  it("returns an invalid-request auditor deliverable instead of throwing", async () => {
+    const deliverable = await buildAuditDeliverableFromNegotiation({
+      negotiationId: "neg-invalid-audit",
+      serviceId: "svc-audit",
+      requesterAgentId: "requester",
+      providerAgentId: "provider",
+      requirements: JSON.stringify({
+        agentId: "bad-agent",
+        serviceId: "bad-service",
+        mode: "cncncn"
+      }),
+      status: "pending",
+      rejectReason: "",
+      metadata: "",
+      expiresAt: "",
+      createdTime: "",
+      updatedTime: ""
+    } satisfies Negotiation);
+
+    expect(deliverable).toMatchObject({
+      grade: "F",
+      recommendation: "FIX_INPUT",
+      overall_score: 0,
+      target_agent: "invalid request",
+      target_service: "invalid request",
+      receipt_hash: [expect.stringMatching(/^sha256:/)]
+    });
+    expect(String(deliverable.finding_summary)).toContain("/mode");
+  });
 });
